@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ylona-fabiani/node-TP5#readme",
   "dependencies": {
+    "axios": "^0.24.0",
     "express": "^4.17.1"
   }
 }
