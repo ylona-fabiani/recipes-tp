@@ -1,12 +1,7 @@
-const passport = require('passport');
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-const jwt = require('jsonwebtoken');
-const axios = require('axios')
-const express = require('express');
-const app = express();
-const urlEncodedParser = express.urlencoded({ extended: false })
+const express = require('express')
+const app = express()
 const PORT = process.env.PORT || 5000 // this is very important
+const axios = require('axios')
 const api_key = '04c547857520b4a9bbe5ee0d32db370e6cfed'
 
 app.listen(PORT, function () {
