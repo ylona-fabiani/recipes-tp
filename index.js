@@ -1,7 +1,12 @@
-const express = require('express')
-const app = express()
-const PORT = process.env.PORT || 5000 // this is very important
+const passport = require('passport');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const jwt = require('jsonwebtoken');
 const axios = require('axios')
+const express = require('express');
+const app = express();
+const urlEncodedParser = express.urlencoded({ extended: false })
+const PORT = process.env.PORT || 5000 // this is very important
 const api_key = '04c547857520b4a9bbe5ee0d32db370e6cfed'
 
 app.listen(PORT, function () {
@@ -30,7 +35,7 @@ app.get('/users', async function (req, res) {
   res.send(db.data)
 })
 
-//CREATE
+//CREATE Recipes
 app.post('/recipes', express.json(), async function(req,res){
   const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-recipes', req.body,{
     headers: {
@@ -40,6 +45,7 @@ app.post('/recipes', express.json(), async function(req,res){
   res.send('Recette créée !')
 })
 
+//CREATE Users
 app.post('/users', express.json(), async function (req, res) {
   try {
     const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-users', req.body, {
