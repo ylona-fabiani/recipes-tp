@@ -8,13 +8,13 @@ Créez une API de gestion de recettes. Cette API doit contenir:
 
     une route pour récupérer la liste des recettes (FAIT)
 
-    une route pour ajouter une recette
+    une route pour ajouter une recette (FAIT)
 
-    une route pour supprimer une recette
+    une route pour supprimer une recette (FAIT)
 
-    une route pour modifier une recette
+    une route pour modifier une recette (FAIT)
 
-    une route pour créer un compte
+    une route pour créer un compte (FAIT)
 
     une route pour se connecter (récupérer un JWT)
 
