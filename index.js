@@ -70,3 +70,66 @@ app.delete('/recipes/:id', async function (req, res) {
   const db = await axios.delete(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, { headers : {'x-api-key' : api_key} })
   res.json("Recette supprimée.")
 })
+
+
+//Login
+
+const passport = require('passport')
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const secret = 'thisismysecret'
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secret
+}
+
+const users = [{ name: 'rouree', password: '0000' }]
+
+passport.use(
+  new JwtStrategy(jwtOptions, function(payload, next) {
+    const user = users.find(user => user.name === payload.name)
+
+    if (user) {
+      next(null, user)
+    } else {
+      next(null, false)
+    }
+  })
+)
+
+app.use(passport.initialize())
+app.use(express.json())
+
+app.get('/private', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.send('private. user:' + req.user.name)
+})
+
+app.post('/login', async function (req, res) {
+  const name = req.body.name
+  const password = req.body.password
+
+  if (!name || !password) {
+    res.status(401).json({ error: 'name or password was not provided.' })
+    return
+  }
+
+  // usually this would be a database call:
+  const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-users', { headers: { 'x-api-key': api_key } })
+
+  console.log(db);
+
+  const user = db.data.find(user => user.name === name)
+  
+
+  if (!user || user.password !== password) {
+    res.status(401).json({ error: 'name / password do not match.' })
+    return
+  }
+
+  const userJwt = jwt.sign({ name: user.name }, secret)
+
+  res.json({ jwt: userJwt })
+})
