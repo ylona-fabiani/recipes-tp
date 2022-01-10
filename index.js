@@ -9,7 +9,6 @@ app.listen(PORT, function () {
 })
 
 // READ ALL RECIPES
-
 app.get('/recipes', async function (req, res) {
   const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-recipes', { headers : {'x-api-key' : api_key} })
   let qTitle = db.data.map(e => {return {"id" : e._id, "title" : e.title}}); // map renvoie un nvo tableau de ce qu'on veut 
@@ -33,23 +32,35 @@ app.get('/users', async function (req, res) {
 
 //CREATE
 app.post('/recipes', express.json(), async function(req,res){
-  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/recipes', req.body,{
+  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-recipes', req.body,{
     headers: {
       "x-api-key": api_key
     }
   })
-  res.send('Recette Créée')
+  res.send('Recette créée !')
 })
 
 app.post('/users', express.json(), async function(req,res){
-  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/recipes', req.body,{
+  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-users', req.body,{
     headers: {
       "x-api-key": api_key
     }
   })
-  res.send('Recette Créée')
+  res.send('USER créée !')
 })
 
 //UPDATE
 
+app.put('/recipes/:id', express.json(), async function(req,res){
+  const db = await axios.put(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, req.body,{
+    headers: { "x-api-key": api_key }
+  })
+  res.send("Recette modifiée !")
+})
+
 //DELETE
+
+app.delete('/recipes/:id', async function (req, res) {
+  const db = await axios.delete(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, { headers : {'x-api-key' : api_key} })
+  res.json("Recette supprimée.")
+})
