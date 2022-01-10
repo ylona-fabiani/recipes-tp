@@ -4,6 +4,34 @@ const PORT = process.env.PORT || 5000 // this is very important
 const axios = require('axios')
 const api_key = '04c547857520b4a9bbe5ee0d32db370e6cfed'
 
+const passport = require('passport')
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const secret = 'thisismysecret'
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secret
+}
+
+passport.use(
+  new JwtStrategy(jwtOptions, async function(payload, next) {
+    const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-users', { headers: { 'x-api-key': api_key } });
+    const user = db.data.find(user => user._id === payload._id)
+
+    if (user) {
+      next(null, user)
+    } else {
+      next(null, false)
+    }
+  })
+)
+
+app.use(express.json())
+app.use(passport.initialize())
+
 app.listen(PORT, function () {
   console.log('Example app listening on port ' + PORT)
 })
@@ -31,8 +59,10 @@ app.get('/users', async function (req, res) {
 })
 
 //CREATE Recipes
-app.post('/recipes', express.json(), async function(req,res){
-  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-recipes', req.body,{
+app.post('/recipes', passport.authenticate('jwt', { session: false }), express.json(), async function(req,res){
+  let toto = req.user._id;
+  req.body["creator"] = toto;
+  const db = await axios.post(`https://recipestp-2fc5.restdb.io/rest/r-recipes`, req.body,{
     headers: {
       "x-api-key": api_key
     }
@@ -74,37 +104,8 @@ app.delete('/recipes/:id', async function (req, res) {
 
 //Login
 
-const passport = require('passport')
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const secret = 'thisismysecret'
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: secret
-}
-
-const users = [{ name: 'rouree', password: '0000' }]
-
-passport.use(
-  new JwtStrategy(jwtOptions, function(payload, next) {
-    const user = users.find(user => user.name === payload.name)
-
-    if (user) {
-      next(null, user)
-    } else {
-      next(null, false)
-    }
-  })
-)
-
-app.use(passport.initialize())
-app.use(express.json())
-
 app.get('/private', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.send('private. user:' + req.user.name)
+  res.send('private. user:' + req.user._id)
 })
 
 app.post('/login', async function (req, res) {
@@ -119,17 +120,14 @@ app.post('/login', async function (req, res) {
   // usually this would be a database call:
   const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-users', { headers: { 'x-api-key': api_key } })
 
-  console.log(db);
-
   const user = db.data.find(user => user.name === name)
   
-
   if (!user || user.password !== password) {
     res.status(401).json({ error: 'name / password do not match.' })
     return
   }
 
-  const userJwt = jwt.sign({ name: user.name }, secret)
+  const userJwt = jwt.sign({ _id: user._id }, secret)
 
   res.json({ jwt: userJwt })
 })
