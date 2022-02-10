@@ -8,8 +8,17 @@ app.listen(PORT, function () {
   console.log('Example app listening on port ' + PORT)
 })
 
+function setHeader(res, url) {
+  res.header('Access-Control-Allow-Origin', url)
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+  res.header('Access-Control-Allow-Headers', 'Content-Type')
+  return res
+}
+
+
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
+  res = setHeader(res, 'https://dkz3z.csb.app')
   const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-recipes', { headers: { 'x-api-key': api_key } })
   let qTitle = db.data.map(e => { return { "id": e._id, "title": e.title } }); // map renvoie un nvo tableau de ce qu'on veut 
   // on,peut apres faire un foreach dessus pour les titles en li
@@ -108,6 +117,12 @@ app.get('/private', passport.authenticate('jwt', { session: false }), (req, res)
 })
 
 app.post('/login', async function (req, res) {
+
+
+  res = setHeader(res, 'https://dkz3z.csb.app')
+
+  console.log(setHeader(res, 'https://dkz3z.csb.app'))
+
   const name = req.body.name
   const password = req.body.password
 
