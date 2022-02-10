@@ -16,9 +16,9 @@ Créez une API de gestion de recettes. Cette API doit contenir:
 
     une route pour créer un compte (FAIT)
 
-    une route pour se connecter (récupérer un JWT)
+    une route pour se connecter (récupérer un JWT) (FAIT)
 
-Les routes liées à la creation/suppression/modification de recettes doivent être uniquement accessibles aux personnes connectés. La seule personne pouvant modifier ou supprimer une recette doit être la personne qui l'a créé.
+Les routes liées à la creation/suppression/modification de recettes doivent être uniquement accessibles aux personnes connectés. La seule personne pouvant modifier ou supprimer une recette doit être la personne qui l'a créé. (FAIT 1/3)
 
 Les utilisateurs ainsi que les recettes seront stockés dans restdb comme vu en TP.
 
