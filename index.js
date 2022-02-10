@@ -3,6 +3,35 @@ const app = express()
 const PORT = process.env.PORT || 5000 // this is very important
 const axios = require('axios')
 const api_key = '04c547857520b4a9bbe5ee0d32db370e6cfed'
+const urlDb = 'https://recipestp-2fc5.restdb.io/rest/'
+
+const passport = require('passport')
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const secret = 'thisismysecret'
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secret
+}
+
+passport.use(
+  new JwtStrategy(jwtOptions, async function(payload, next) {
+    const db = await axios.get(urlDb + 'r-users', { headers: { 'x-api-key': api_key } });
+    const user = db.data.find(user => user._id === payload._id)
+
+    if (user) {
+      next(null, user)
+    } else {
+      next(null, false)
+    }
+  })
+)
+
+app.use(express.json())
+app.use(passport.initialize())
 
 app.listen(PORT, function () {
   console.log('Example app listening on port ' + PORT)
@@ -18,8 +47,12 @@ function setHeader(res, url) {
 
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
+<<<<<<< HEAD
   res = setHeader(res, 'https://dkz3z.csb.app')
   const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-recipes', { headers: { 'x-api-key': api_key } })
+=======
+  const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
+>>>>>>> 80fe6c3aa82b9523c3298649f711e8e48c252b0e
   let qTitle = db.data.map(e => { return { "id": e._id, "title": e.title } }); // map renvoie un nvo tableau de ce qu'on veut 
   // on,peut apres faire un foreach dessus pour les titles en li
   res.json(qTitle)
@@ -27,21 +60,22 @@ app.get('/recipes', async function (req, res) {
 
 // READ ONE RECIPE
 app.get('/recipes/:id', async function (req, res) {
-  const db = await axios.get(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, { headers : {'x-api-key' : api_key} })
-  let qTitle = {"id" : db.data._id, "title" : db.data.title}; // map renvoie un nvo tableau de ce qu'on veut 
-                                                              // on,peut apres faire un foreach dessus pour les titles en li
+  let recipe = getOneRecipe(req.params.id);
+  let qTitle = {"id" : recipe._id, "title" : recipe.title};
   res.json(qTitle)
 })
 
+// READ ALL USERS
 app.get('/users', async function (req, res) {
-  const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-users', { headers: { 'x-api-key': api_key } })
+  const db = await axios.get(`${urlDb}r-users`, { headers: { 'x-api-key': api_key } })
   console.log(db.data);
   res.send(db.data)
 })
 
 //CREATE Recipes
-app.post('/recipes', express.json(), async function(req,res){
-  const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-recipes', req.body,{
+app.post('/recipes', passport.authenticate('jwt', { session: false }), express.json(), async function(req,res){
+  req.body["creator"] = req.user._id;
+  const db = await axios.post(`${urlDb}r-recipes`, req.body,{
     headers: {
       "x-api-key": api_key
     }
@@ -52,7 +86,7 @@ app.post('/recipes', express.json(), async function(req,res){
 //CREATE Users
 app.post('/users', express.json(), async function (req, res) {
   try {
-    const db = await axios.post('https://recipestp-2fc5.restdb.io/rest/r-users', req.body, {
+    const db = await axios.post(`${urlDb}r-users`, req.body, {
       headers: {
         "x-api-key": api_key
       }
@@ -66,54 +100,30 @@ app.post('/users', express.json(), async function (req, res) {
 
 //UPDATE
 
-app.put('/recipes/:id', express.json(), async function(req,res){
-  const db = await axios.put(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, req.body,{
-    headers: { "x-api-key": api_key }
-  })
-  res.send("Recette modifiée !")
+app.put('/recipes/:id',  passport.authenticate('jwt', { session: false }), express.json(), async function(req,res) {
+  if (getOneRecipe(req.params.id) == req.user._id) {
+    const db = await axios.put(`${urlDb}r-recipes/${req.params.id}`, req.body, {headers: {"x-api-key": api_key }})
+    res.send("Recette modifiée !")
+  }
 })
 
 //DELETE
 
-app.delete('/recipes/:id', async function (req, res) {
-  const db = await axios.delete(`https://recipestp-2fc5.restdb.io/rest/r-recipes/${req.params.id}`, { headers : {'x-api-key' : api_key} })
+app.delete('/recipes/:id',  passport.authenticate('jwt', { session: false }), async function (req, res) {
+  const db = await axios.delete(`${urlDb}r-recipes/${req.params.id}`, { headers : {'x-api-key' : api_key} })
   res.json("Recette supprimée.")
 })
+
+getOneRecipe = async function(id) {
+  const db = await axios.get(`${urlDb}r-recipes/${id}`, { headers : {'x-api-key' : api_key} })
+  return db.data
+}
 
 
 //Login
 
-const passport = require('passport')
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const secret = 'thisismysecret'
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: secret
-}
-
-const users = [{ name: 'rouree', password: '0000' }]
-
-passport.use(
-  new JwtStrategy(jwtOptions, function(payload, next) {
-    const user = users.find(user => user.name === payload.name)
-
-    if (user) {
-      next(null, user)
-    } else {
-      next(null, false)
-    }
-  })
-)
-
-app.use(passport.initialize())
-app.use(express.json())
-
 app.get('/private', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.send('private. user:' + req.user.name)
+  res.send('private. user:' + req.user._id)
 })
 
 app.post('/login', async function (req, res) {
@@ -132,19 +142,16 @@ app.post('/login', async function (req, res) {
   }
 
   // usually this would be a database call:
-  const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-users', { headers: { 'x-api-key': api_key } })
-
-  console.log(db);
+  const db = await axios.get(urlDb + 'r-users', { headers: { 'x-api-key': api_key } })
 
   const user = db.data.find(user => user.name === name)
   
-
   if (!user || user.password !== password) {
     res.status(401).json({ error: 'name / password do not match.' })
     return
   }
 
-  const userJwt = jwt.sign({ name: user.name }, secret)
+  const userJwt = jwt.sign({ _id: user._id }, secret)
 
   res.json({ jwt: userJwt })
 })
