@@ -48,12 +48,8 @@ function setHeader(res, url) {
 
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
-<<<<<<< HEAD
   res = setHeader(res, 'https://dkz3z.csb.app')
-  const db = await axios.get('https://recipestp-2fc5.restdb.io/rest/r-recipes', { headers: { 'x-api-key': api_key } })
-=======
   const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
->>>>>>> 80fe6c3aa82b9523c3298649f711e8e48c252b0e
   let qTitle = db.data.map(e => { return { "id": e._id, "title": e.title } }); // map renvoie un nvo tableau de ce qu'on veut 
   // on,peut apres faire un foreach dessus pour les titles en li
   res.json(qTitle)
