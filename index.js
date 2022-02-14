@@ -43,16 +43,18 @@ console.log('init')
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
   const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
-  let qTitle = db.data.map(e => { return { "id": e._id, "title": e.title } }); // map renvoie un nvo tableau de ce qu'on veut 
+  let qTitle = db.data.map(e => { return { "_id": e._id, "title": e.title, "time" : e.time, "creator" : e.creator, "products" : e.products } }); // map renvoie un nvo tableau de ce qu'on veut 
   // on,peut apres faire un foreach dessus pour les titles en li
   res.json(qTitle)
 })
 
 // READ ONE RECIPE
 app.get('/recipes/:id', async function (req, res) {
-  let recipe = getOneRecipe(req.params.id);
+  let recipe = await getOneRecipe(req.params.id);
   let qTitle = {"id" : recipe._id, "title" : recipe.title};
-  res.json(qTitle)
+  //res.json(qTitle)
+  console.log(recipe)
+  res.send(recipe);
 })
 
 // READ ALL USERS
