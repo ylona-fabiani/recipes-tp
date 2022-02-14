@@ -4,6 +4,7 @@ const PORT = process.env.PORT || 5000 // this is very important
 const axios = require('axios')
 const api_key = '04c547857520b4a9bbe5ee0d32db370e6cfed'
 const urlDb = 'https://recipestp-2fc5.restdb.io/rest/'
+const cors = require('cors')
 
 
 const passport = require('passport')
@@ -33,22 +34,14 @@ passport.use(
 
 app.use(express.json())
 app.use(passport.initialize())
+app.use(cors())
 
-app.listen(PORT, function () {
-  console.log('Example app listening on port ' + PORT)
-})
+console.log('init')
 
-function setHeader(res, url) {
-  res.header('Access-Control-Allow-Origin', url)
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
-  res.header('Access-Control-Allow-Headers', 'Content-Type')
-  return res
-}
 
 
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
-  res = setHeader(res, 'https://dkz3z.csb.app')
   const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
   let qTitle = db.data.map(e => { return { "id": e._id, "title": e.title } }); // map renvoie un nvo tableau de ce qu'on veut 
   // on,peut apres faire un foreach dessus pour les titles en li
@@ -82,6 +75,7 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
 
 //CREATE Users
 app.post('/users', express.json(), async function (req, res) {
+  console.log(req.body);
   try {
     const db = await axios.post(`${urlDb}r-users`, req.body, {
       headers: {
@@ -91,6 +85,7 @@ app.post('/users', express.json(), async function (req, res) {
     res.send('Utilisateur Créée')
   }
   catch(err) {
+    //console.log(err)
     res.send('pb telephone')
   }
 })
@@ -124,12 +119,6 @@ app.get('/private', passport.authenticate('jwt', { session: false }), (req, res)
 })
 
 app.post('/login', async function (req, res) {
-
-
-  res = setHeader(res, 'https://dkz3z.csb.app')
-
-  console.log(setHeader(res, 'https://dkz3z.csb.app'))
-
   const name = req.body.name
   const password = req.body.password
 
@@ -151,4 +140,8 @@ app.post('/login', async function (req, res) {
   const userJwt = jwt.sign({ _id: user._id }, secret)
 
   res.json({ jwt: userJwt })
+})
+
+app.listen(PORT, function () {
+  console.log('Example app listening on port ' + PORT)
 })
