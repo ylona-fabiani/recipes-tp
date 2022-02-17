@@ -136,8 +136,8 @@ app.post('/login', async function (req, res) {
   }
 
   const userJwt = jwt.sign({ _id: user._id }, secret)
-
-  res.json({ jwt: userJwt })
+  console.log(user)
+  res.json({ jwt: userJwt, user : user })
 })
 
 app.listen(PORT, function () {
