@@ -73,16 +73,12 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
 //CREATE Users
 app.post('/users', express.json(), async function (req, res) {
   try {
-    const db = await axios.post(`${urlDb}r-users`, req.body, {
-      headers: {
-        "x-api-key": api_key
-      }
-    })
-    res.send('Utilisateur Créée')
+    const db = await axios.post(`${urlDb}r-users`, req.body, { headers: { "x-api-key": api_key }})
+    res.send('Utilisateur Créé')
   }
   catch(err) {
     //console.log(err)
-    res.send('pb telephone')
+    res.send('problème')
   }
 })
 
