@@ -36,9 +36,6 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use(cors())
 
-console.log('init')
-
-
 
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
@@ -53,14 +50,12 @@ app.get('/recipes/:id', async function (req, res) {
   let recipe = await getOneRecipe(req.params.id);
   let qTitle = {"id" : recipe._id, "title" : recipe.title};
   //res.json(qTitle)
-  console.log(recipe)
   res.send(recipe);
 })
 
 // READ ALL USERS
 app.get('/users', async function (req, res) {
   const db = await axios.get(`${urlDb}r-users`, { headers: { 'x-api-key': api_key } })
-  console.log(db.data);
   res.send(db.data)
 })
 
@@ -77,7 +72,6 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
 
 //CREATE Users
 app.post('/users', express.json(), async function (req, res) {
-  console.log(req.body);
   try {
     const db = await axios.post(`${urlDb}r-users`, req.body, {
       headers: {
@@ -95,7 +89,11 @@ app.post('/users', express.json(), async function (req, res) {
 //UPDATE
 
 app.put('/recipes/:id',  passport.authenticate('jwt', { session: false }), express.json(), async function(req,res) {
-  if (getOneRecipe(req.params.id) == req.user._id) {
+  console.log("UPDATE : " + req.user._id)
+  let creatorr =  (await getOneRecipe(req.params.id)).creator;
+  console.log("coreatorr" + creatorr);
+  console.log("get " + (await getOneRecipe(req.params.id)).creator);
+  if (creatorr == req.user._id) {
     const db = await axios.put(`${urlDb}r-recipes/${req.params.id}`, req.body, {headers: {"x-api-key": api_key }})
     res.send("Recette modifiée !")
   }
@@ -110,6 +108,7 @@ app.delete('/recipes/:id',  passport.authenticate('jwt', { session: false }), as
 
 getOneRecipe = async function(id) {
   const db = await axios.get(`${urlDb}r-recipes/${id}`, { headers : {'x-api-key' : api_key} })
+  console.log("getOne : " + db.data.creator)
   return db.data
 }
 
@@ -140,7 +139,6 @@ app.post('/login', async function (req, res) {
   }
 
   const userJwt = jwt.sign({ _id: user._id }, secret)
-  console.log(user)
   res.json({ jwt: userJwt, user : user })
 })
 
