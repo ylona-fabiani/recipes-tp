@@ -40,7 +40,7 @@ app.use(cors())
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
   const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
-  let qTitle = db.data.map(e => { return { "_id": e._id, "title": e.title, "time" : e.time, "creator" : e.creator, "products" : e.products, "image" : e.image , "file" : e.file} }); // map renvoie un nvo tableau de ce qu'on veut
+  let qTitle = db.data.map(e => { return { "_id": e._id, "title": e.title, "time" : e.time, "creator" : e.creator, "products" : e.products, "imageData" : e.imageData} }); // map renvoie un nvo tableau de ce qu'on veut
   // on,peut apres faire un foreach dessus pour les titles en li
   console.log(qTitle)
   res.json(qTitle)
@@ -71,17 +71,6 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
   res.send('Recette créée !')
 })
 
-
-app.post('/image', express.json(), async function (req, res) {
-  try {
-    const db = await axios.post(`https://recipestp-2fc5.restdb.io/media`, req.body, { headers: { "x-api-key": api_key }})
-    res.send('img poste')
-  }
-  catch(err) {
-    console.log(err)
-    res.send('problème')
-  }
-})
 
 
 //CREATE Users
