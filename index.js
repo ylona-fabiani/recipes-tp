@@ -40,8 +40,9 @@ app.use(cors())
 // READ ALL RECIPES
 app.get('/recipes', async function (req, res) {
   const db = await axios.get(`${urlDb}r-recipes`, { headers: { 'x-api-key': api_key } })
-  let qTitle = db.data.map(e => { return { "_id": e._id, "title": e.title, "time" : e.time, "creator" : e.creator, "products" : e.products } }); // map renvoie un nvo tableau de ce qu'on veut 
+  let qTitle = db.data.map(e => { return { "_id": e._id, "title": e.title, "time" : e.time, "creator" : e.creator, "products" : e.products, "image" : e.image , "file" : e.file} }); // map renvoie un nvo tableau de ce qu'on veut
   // on,peut apres faire un foreach dessus pour les titles en li
+  console.log(qTitle)
   res.json(qTitle)
 })
 
@@ -70,6 +71,19 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
   res.send('Recette créée !')
 })
 
+
+app.post('/image', express.json(), async function (req, res) {
+  try {
+    const db = await axios.post(`https://recipestp-2fc5.restdb.io/media`, req.body, { headers: { "x-api-key": api_key }})
+    res.send('img poste')
+  }
+  catch(err) {
+    console.log(err)
+    res.send('problème')
+  }
+})
+
+
 //CREATE Users
 app.post('/users', express.json(), async function (req, res) {
   try {
@@ -85,11 +99,9 @@ app.post('/users', express.json(), async function (req, res) {
 //UPDATE
 
 app.put('/recipes/:id',  passport.authenticate('jwt', { session: false }), express.json(), async function(req,res) {
-  console.log("UPDATE : " + req.user._id)
+
   let creatorr =  (await getOneRecipe(req.params.id)).creator;
-  console.log("coreatorr" + creatorr);
-  console.log("get " + (await getOneRecipe(req.params.id)).creator);
-  if (creatorr == req.user._id) {
+  if (creatorr === req.user._id) {
     const db = await axios.put(`${urlDb}r-recipes/${req.params.id}`, req.body, {headers: {"x-api-key": api_key }})
     res.send("Recette modifiée !")
   }
@@ -104,7 +116,6 @@ app.delete('/recipes/:id',  passport.authenticate('jwt', { session: false }), as
 
 getOneRecipe = async function(id) {
   const db = await axios.get(`${urlDb}r-recipes/${id}`, { headers : {'x-api-key' : api_key} })
-  console.log("getOne : " + db.data.creator)
   return db.data
 }
 
@@ -116,21 +127,21 @@ app.get('/private', passport.authenticate('jwt', { session: false }), (req, res)
 })
 
 app.post('/login', async function (req, res) {
-  const name = req.body.name
+  const username = req.body.username
   const password = req.body.password
 
-  if (!name || !password) {
-    res.status(401).json({ error: 'name or password was not provided.' })
+  if (!username || !password) {
+    res.status(401).json({ error: 'username or password was not provided.' })
     return
   }
 
   // usually this would be a database call:
   const db = await axios.get(urlDb + 'r-users', { headers: { 'x-api-key': api_key } })
 
-  const user = db.data.find(user => user.name === name)
+  const user = db.data.find(user => user.username === username)
   
   if (!user || user.password !== password) {
-    res.status(401).json({ error: 'name / password do not match.' })
+    res.status(401).json({ error: 'username / password do not match.' })
     return
   }
 

@@ -34,3 +34,8 @@ Le rendu du projet sera
 
     l'URL d'un github contenant les sources de votre projet ainsi qu'un readme qui explique comment lancer/installer le projet + les parties manquantes et pourquoi (si vous n'avez tout fait).
     l'URL de votre API + l'url de l'application finale (avec la partie Vue.js)
+    
+    
+    Lien utile :
+    - https://pierrecavalet-apidae.netlify.app/
+    - https://recipestp-2fc5.restdb.io/home/
