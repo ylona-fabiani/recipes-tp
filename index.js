@@ -58,6 +58,10 @@ app.get('/users', async function (req, res) {
   const db = await axios.get(`${urlDb}r-users`, { headers: { 'x-api-key': api_key } })
   res.send(db.data)
 })
+app.get('/image', async function (req, res) {
+  const db = await axios.get("https://recipestp-2fc5.restdb.io/media/6211906bf701f460000b0a6a", { headers: { 'x-api-key': api_key } })
+  res.send(db.data)
+})
 
 //CREATE Recipes
 app.post('/recipes', passport.authenticate('jwt', { session: false }), express.json(), async function(req,res){
@@ -67,7 +71,7 @@ app.post('/recipes', passport.authenticate('jwt', { session: false }), express.j
       "x-api-key": api_key
     }
   })
-  res.send('Recette créée !')
+  res.send(db.data)
 })
 
 
@@ -135,6 +139,7 @@ app.post('/login', async function (req, res) {
   const userJwt = jwt.sign({ _id: user._id }, secret)
   res.json({ jwt: userJwt, user : user })
 })
+
 
 app.listen(PORT, function () {
   console.log('Example app listening on port ' + PORT)
