@@ -10,6 +10,8 @@
 	Lancer le projet node avec la commande : `node index.js`
 	Lancer le projet vue avec la commande : `npm run serve`
 
+
 ### URL de production :
 	Partie vue -> https://unruffled-johnson-e0a9ad.netlify.app/#/
 	Partie node -> https://recipes-tp.herokuapp.com/
+
